@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>BIO-ATHLETE 53</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --void:#020408;--panel:#08131f;--surface:#0d1f30;--border:#0e2a3d;
+  --glow:#00d4ff;--glow2:#00ff9d;--glow3:#ff4d6d;--glow4:#ffd60a;--oura:#c084fc;--strava:#fc4c02;
+  --text:#e2f4ff;--muted:#4a7a96;--dim:#1a3a50;
+  --font-mono:'Space Mono',monospace;--font-display:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--void);color:var(--text);font-family:var(--font-display);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 15% 15%,rgba(0,212,255,0.04) 0%,transparent 50%),radial-gradient(ellipse at 85% 85%,rgba(252,76,2,0.03) 0%,transparent 50%);pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 20px 60px;}
+header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(2,4,8,0.96);backdrop-filter:blur(20px);z-index:100;flex-wrap:wrap;gap:8px;}
+.logo{display:flex;flex-direction:column;}
+.logo-row{display:flex;align-items:baseline;gap:8px;}
+.logo-main{font-size:15px;font-weight:800;letter-spacing:4px;text-transform:uppercase;}
+.logo-num{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--glow);text-shadow:0 0 18px var(--glow);}
+.logo-sub{font-family:var(--font-mono);font-size:8px;color:var(--muted);letter-spacing:2px;margin-top:2px;}
+.hdr-right{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.pulse-dot{width:6px;height:6px;background:var(--glow2);border-radius:50%;animation:pulse 2s infinite;display:inline-block;}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,157,0.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,157,0)}}
+.hdr-stat{font-family:var(--font-mono);font-size:9px;color:var(--muted);}
+.hdr-stat span{color:var(--glow4);font-weight:700;}
+.tabs{display:flex;gap:4px;padding:16px 0 0;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto;}
+.tab{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;padding:8px 14px;border:1px solid transparent;border-radius:4px 4px 0 0;cursor:pointer;color:var(--muted);background:none;transition:.2s;white-space:nowrap;}
+.tab:hover{color:var(--text);border-color:var(--dim);}
+.tab.active{color:var(--glow);border-color:var(--border);border-bottom-color:var(--void);background:var(--panel);}
+.pane{display:none;}.pane.active{display:block;}
+.grid{display:grid;gap:14px;margin-bottom:16px;}
+.cols-5{grid-template-columns:repeat(5,1fr);}
+.cols-4{grid-template-columns:repeat(4,1fr);}
+.cols-3{grid-template-columns:repeat(3,1fr);}
+.cols-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:900px){.cols-5,.cols-4{grid-template-columns:repeat(2,1fr)}.cols-3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.cols-5,.cols-4,.cols-3,.cols-2{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.card-title{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.lbl{font-family:var(--font-mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.val{font-size:22px;font-weight:800;color:var(--glow);margin-top:2px;}
+.val-sm{font-size:14px;font-weight:700;color:var(--glow);}
+.bar-wrap{background:var(--dim);border-radius:3px;height:5px;margin-top:6px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:.5s;}
+.tag{font-family:var(--font-mono);font-size:9px;padding:2px 7px;border-radius:3px;display:inline-block;}
+.tag-ok{background:rgba(0,255,157,.12);color:var(--glow2);border:1px solid rgba(0,255,157,.25);}
+.tag-warn{background:rgba(255,214,10,.1);color:var(--glow4);border:1px solid rgba(255,214,10,.2);}
+.tag-danger{background:rgba(255,77,109,.1);color:var(--glow3);border:1px solid rgba(255,77,109,.2);}
+.tag-info{background:rgba(0,212,255,.1);color:var(--glow);border:1px solid rgba(0,212,255,.2);}
+.tag-strava{background:rgba(252,76,2,.12);color:var(--strava);border:1px solid rgba(252,76,2,.25);}
+.score-wrap{display:flex;align-items:center;gap:20px;}
+.score-breakdown{flex:1;display:flex;flex-direction:column;gap:6px;}
+.score-row{display:flex;align-items:center;gap:8px;}
+.score-label{font-family:var(--font-mono);font-size:9px;color:var(--muted);width:90px;}
+.score-bar{flex:1;height:4px;background:var(--dim);border-radius:2px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:2px;}
+.score-num{font-family:var(--font-mono);font-size:9px;width:24px;text-align:right;}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+label{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+input,select,textarea{background:var(--surface);color:var(--text);border:1px solid var(--border);padding:8px 10px;border-radius:6px;font-family:var(--font-mono);font-size:11px;width:100%;}
+input:focus,select:focus{outline:none;border-color:var(--glow);box-shadow:0 0 0 2px rgba(0,212,255,.1);}
+select option{background:var(--panel);}
+.btn{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;padding:10px 20px;border:1px solid;border-radius:6px;cursor:pointer;text-transform:uppercase;transition:.2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-glow{background:rgba(0,212,255,.1);border-color:var(--glow);color:var(--glow);}
+.btn-glow:hover{background:rgba(0,212,255,.2);box-shadow:0 0 12px rgba(0,212,255,.3);}
+.btn-strava{background:rgba(252,76,2,.15);border-color:var(--strava);color:var(--strava);}
+.btn-strava:hover{background:rgba(252,76,2,.25);box-shadow:0 0 12px rgba(252,76,2,.3);}
+.btn-danger{background:rgba(255,77,109,.1);border-color:var(--glow3);color:var(--glow3);font-size:9px;padding:4px 8px;}
+.btn-sm{padding:5px 10px;font-size:9px;}
+.supps-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.supp-chip{font-family:var(--font-mono);font-size:9px;padding:4px 10px;border:1px solid var(--dim);border-radius:20px;cursor:pointer;color:var(--muted);background:var(--surface);transition:.2s;user-select:none;}
+.supp-chip.sel{border-color:var(--oura);color:var(--oura);background:rgba(192,132,252,.08);}
+.tbl-wrap{overflow-x:auto;margin-top:12px;}
+table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:10px;}
+th{color:var(--muted);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);font-size:8px;letter-spacing:1px;white-space:nowrap;}
+td{padding:7px 10px;border-bottom:1px solid rgba(14,42,61,.5);color:var(--text);white-space:nowrap;}
+tr:hover td{background:rgba(13,31,48,.8);}
+.tl-item{display:flex;gap:14px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(14,42,61,.4);}
+.tl-time{font-family:var(--font-mono);font-size:10px;color:var(--glow);min-width:50px;padding-top:2px;}
+.tl-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--glow);margin-top:4px;flex-shrink:0;background:rgba(0,212,255,.2);}
+.tl-content{flex:1;}.tl-title{font-weight:700;font-size:12px;margin-bottom:2px;}
+.tl-desc{font-family:var(--font-mono);font-size:9px;color:var(--muted);}
+.bm-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(14,42,61,.4);}
+.bm-name{font-family:var(--font-mono);font-size:10px;min-width:130px;color:var(--text);}
+.bm-range{font-family:var(--font-mono);font-size:8px;color:var(--muted);min-width:80px;text-align:right;}
+.sec-hdr{font-family:var(--font-mono);font-size:8px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;border-left:2px solid var(--glow);padding-left:10px;margin:20px 0 12px;}
+.act-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px;}
+.act-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.act-title{font-weight:700;font-size:13px;}
+.act-stats{display:flex;gap:14px;flex-wrap:wrap;}
+.act-stat{font-family:var(--font-mono);font-size:10px;color:var(--muted);}
+.act-stat span{color:var(--text);font-weight:700;}
+.exercise-row{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap;}
+/* OWNER PANEL */
+.owner-panel{border:1px solid rgba(0,212,255,.2);border-radius:10px;padding:16px;background:rgba(0,212,255,.03);margin-bottom:16px;}
+.info-box{padding:12px;background:rgba(0,0,0,.2);border-radius:6px;font-family:var(--font-mono);font-size:9px;color:var(--muted);line-height:1.9;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-row">
+      <span class="logo-main">Bio-Athlete</span>
+      <span class="logo-num">53</span>
+    </div>
+    <div class="logo-sub">LONGEVITY &amp; PERFORMANCE SYSTEM · SANTIAGO</div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-stat" id="hdrDate">—</div>
+    <div class="hdr-stat">WEIGHT <span id="hdrW">—</span> kg</div>
+    <div class="hdr-stat">HRV <span id="hdrHRV">—</span></div>
+    <div class="hdr-stat" id="stravaStatus"></div>
+    <span class="pulse-dot"></span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('dash',this)">// DASHBOARD</button>
+    <button class="tab" onclick="showTab('fitness',this)">// FITNESS ⚡</button>
+    <button class="tab" onclick="showTab('log',this)">// LOG DIARIO</button>
+    <button class="tab" onclick="showTab('bio',this)">// BIOMETRÍA</button>
+    <button class="tab" onclick="showTab('proto',this)">// PROTOCOLOS</button>
+    <button class="tab" onclick="showTab('markers',this)">// BIOMARKERS</button>
+    <button class="tab" onclick="showTab('history',this)">// HISTORIAL</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="pane-dash" class="pane active">
+    <div class="sec-hdr">ESTADO ACTUAL</div>
+    <div class="grid cols-5">
+      <div class="card"><div class="lbl">Peso</div><div class="val" id="kW">—</div><div class="lbl">kg</div></div>
+      <div class="card"><div class="lbl">Body Fat</div><div class="val" id="kBF">—</div><div class="lbl">%</div></div>
+      <div class="card"><div class="lbl">Masa Magra</div><div class="val" id="kLBM">—</div><div class="lbl">kg</div></div>
+      <div class="card"><div class="lbl">HRV Hoy</div><div class="val" id="kHRV">—</div><div class="lbl">ms</div></div>
+      <div class="card"><div class="lbl">Sueño</div><div class="val" id="kSleep">—</div><div class="lbl">hrs</div></div>
+    </div>
+    <div class="grid cols-5">
+      <div class="card"><div class="lbl">Calorías</div><div class="val" id="kKcal">—</div><div class="lbl">kcal</div></div>
+      <div class="card"><div class="lbl">Proteína</div><div class="val" id="kProt">—</div><div class="lbl">g</div></div>
+      <div class="card"><div class="lbl">Pasos</div><div class="val" id="kSteps">—</div><div class="lbl">hoy</div></div>
+      <div class="card"><div class="lbl">FC Reposo</div><div class="val" id="kRHR">—</div><div class="lbl">bpm</div></div>
+      <div class="card"><div class="lbl">Agua</div><div class="val" id="kWater">—</div><div class="lbl">L</div></div>
+    </div>
+    <div class="sec-hdr">BIO-SCORE & TENDENCIAS</div>
+    <div class="grid cols-3">
+      <div class="card">
+        <div class="card-title">BIO-SCORE</div>
+        <div class="score-wrap">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#0e2a3d" stroke-width="8"/>
+            <circle id="ringCircle" cx="50" cy="50" r="42" fill="none" stroke="#00d4ff" stroke-width="8" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" transform="rotate(-90 50 50)" style="transition:.8s;filter:drop-shadow(0 0 6px #00d4ff)"/>
+            <text id="ringText" x="50" y="54" text-anchor="middle" font-family="Space Mono" font-size="20" font-weight="700" fill="#00d4ff">—</text>
+          </svg>
+          <div class="score-breakdown" id="scoreBreakdown"></div>
+        </div>
+      </div>
+      <div class="card" style="grid-column:span 2">
+        <div class="card-title">PROGRESO PESO (kg)</div>
+        <canvas id="chartW" height="100"></canvas>
+      </div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card"><div class="card-title">MACROS (g)</div><canvas id="chartM" height="120"></canvas></div>
+      <div class="card"><div class="card-title">META: 10% BODY FAT</div><div id="bfGoalPanel"></div></div>
+    </div>
+    <div class="sec-hdr">ÚLTIMAS ACTIVIDADES STRAVA</div>
+    <div id="dashActivities"><div style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">Cargando actividades...</div></div>
+  </div>
+
+  <!-- FITNESS -->
+  <div id="pane-fitness" class="pane">
+    <div class="sec-hdr">STRAVA — ACTIVIDADES</div>
+
+    <!-- OWNER: private token sync -->
+    <div class="owner-panel" id="ownerPanel" style="display:none">
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--glow);letter-spacing:2px;margin-bottom:10px">🔐 MODO PROPIETARIO</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Access Token (privado — solo tú lo ves)</label>
+          <input type="password" id="stravaManualToken" placeholder="Pega tu access token de strava.com/settings/api"/>
+        </div>
+        <div class="form-group" style="justify-content:flex-end">
+          <label>&nbsp;</label>
+          <button class="btn btn-strava" onclick="stravaConnectAndSync()">⚡ SINCRONIZAR DESDE STRAVA</button>
+        </div>
+      </div>
+      <div class="info-box" style="margin-top:10px">
+        Esto descarga tus actividades de Strava y las guarda en <b style="color:var(--glow)">strava-data.json</b>.<br>
+        Descarga ese archivo y súbelo a tu repo → tu entrenador verá los datos actualizados sin token.
+      </div>
+      <div id="exportArea" style="display:none;margin-top:12px">
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--glow2);margin-bottom:8px">✅ DATOS LISTOS — descarga y sube al repo</div>
+        <button class="btn btn-glow" onclick="downloadJSON()">⬇ DESCARGAR strava-data.json</button>
+      </div>
+    </div>
+
+    <!-- PUBLIC VIEW -->
+    <div id="stravaPublicPanel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:10px;color:var(--glow2)">
+          <span style="font-size:16px">⚡</span>
+          <span id="stravaLastSync">Cargando datos Strava...</span>
+        </div>
+        <button class="btn btn-glow btn-sm" onclick="toggleOwnerPanel()">🔐 PROPIETARIO</button>
+      </div>
+
+      <div class="grid cols-4">
+        <div class="card"><div class="lbl">Km este mes</div><div class="val" id="fKmMonth">—</div></div>
+        <div class="card"><div class="lbl">Actividades mes</div><div class="val" id="fActMonth">—</div></div>
+        <div class="card"><div class="lbl">Tiempo total</div><div class="val" id="fTimeMonth">—</div><div class="lbl">horas</div></div>
+        <div class="card"><div class="lbl">Desnivel ↑</div><div class="val" id="fElevMonth">—</div><div class="lbl">m</div></div>
+      </div>
+      <div class="grid cols-2">
+        <div class="card"><div class="card-title">VOLUMEN SEMANAL (km)</div><canvas id="chartWeeklyVol" height="120"></canvas></div>
+        <div class="card"><div class="card-title">RITMO PROMEDIO (min/km)</div><canvas id="chartPace" height="120"></canvas></div>
+      </div>
+      <div class="sec-hdr">ACTIVIDADES RECIENTES</div>
+      <div id="activitiesList" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+
+    <!-- GYM -->
+    <div class="sec-hdr">GYM — REGISTRO DE SESIÓN</div>
+    <div class="card">
+      <div class="form-grid" style="margin-bottom:12px">
+        <div class="form-group"><label>Fecha</label><input type="date" id="gymFecha"/></div>
+        <div class="form-group"><label>Tipo sesión</label>
+          <select id="gymTipo">
+            <option>Push (Pecho/Hombros/Triceps)</option><option>Pull (Espalda/Biceps)</option>
+            <option>Legs (Cuádriceps/Isquios/Glúteos)</option><option>Full Body</option>
+            <option>Upper Body</option><option>Core & Movilidad</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Duración (min)</label><input type="number" id="gymDur" placeholder="60"/></div>
+        <div class="form-group"><label>RPE global /10</label><input type="number" id="gymRPE" min="1" max="10" placeholder="8"/></div>
+        <div class="form-group"><label>FC Media</label><input type="number" id="gymFC" placeholder="135"/></div>
+        <div class="form-group"><label>Notas</label><input type="text" id="gymNotes" placeholder="Sensaciones, PRs..."/></div>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-bottom:8px;letter-spacing:1px">EJERCICIOS</div>
+      <div id="gymExercises">
+        <div class="exercise-row">
+          <input type="text" placeholder="Ejercicio (ej: Press banca)" style="flex:2"/>
+          <input type="number" placeholder="Series" style="width:70px;flex:none"/>
+          <input type="number" placeholder="Reps" style="width:70px;flex:none"/>
+          <input type="number" placeholder="kg" style="width:70px;flex:none"/>
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--muted)">RPE</span>
+          <input type="number" placeholder="8" style="width:50px;flex:none" min="1" max="10"/>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn btn-glow btn-sm" onclick="addExerciseRow()">+ EJERCICIO</button>
+        <button class="btn btn-glow" onclick="saveGymSession()">💾 GUARDAR SESIÓN</button>
+      </div>
+    </div>
+    <div class="sec-hdr">HISTORIAL GYM</div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>FECHA</th><th>TIPO</th><th>DURACIÓN</th><th>RPE</th><th>EJERCICIOS</th><th>NOTAS</th><th></th></tr></thead>
+          <tbody id="gymHistTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div id="pane-log" class="pane">
+    <div class="sec-hdr">REGISTRO DIARIO</div>
+    <div class="card">
+      <div class="form-grid">
+        <div class="form-group"><label>Fecha</label><input type="date" id="rFecha"/></div>
+        <div class="form-group"><label>Peso (kg)</label><input type="number" id="rPeso" step="0.1" placeholder="78.3"/></div>
+        <div class="form-group"><label>BF %</label><input type="number" id="rBF" step="0.1" placeholder="23.1"/></div>
+        <div class="form-group"><label>Calorías</label><input type="number" id="rKcal" placeholder="1900"/></div>
+        <div class="form-group"><label>Proteína (g)</label><input type="number" id="rProt" placeholder="140"/></div>
+        <div class="form-group"><label>Carbos (g)</label><input type="number" id="rCarbs" placeholder="160"/></div>
+        <div class="form-group"><label>Grasas (g)</label><input type="number" id="rFat" placeholder="60"/></div>
+        <div class="form-group"><label>Agua (L)</label><input type="number" id="rWater" step="0.1" placeholder="3.0"/></div>
+        <div class="form-group"><label>Actividad</label>
+          <select id="rAct"><option value="">—</option><option>Zona 2 Cardio</option><option>Running</option><option>Fuerza</option><option>HIIT</option><option>Natación</option><option>Caminar</option><option>Descanso activo</option></select>
+        </div>
+        <div class="form-group"><label>Distancia (km)</label><input type="number" id="rKm" step="0.1" placeholder="7"/></div>
+        <div class="form-group"><label>Pasos</label><input type="number" id="rPasos" placeholder="10000"/></div>
+        <div class="form-group"><label>HRV (ms)</label><input type="number" id="rHRV" placeholder="55"/></div>
+        <div class="form-group"><label>FC Reposo</label><input type="number" id="rRHR" placeholder="58"/></div>
+        <div class="form-group"><label>Sueño (h)</label><input type="number" id="rSleep" step="0.5" placeholder="8"/></div>
+        <div class="form-group"><label>Calidad Sueño /10</label><input type="number" id="rSQ" min="1" max="10" placeholder="8"/></div>
+        <div class="form-group"><label>REM (min)</label><input type="number" id="rREM" placeholder="41"/></div>
+        <div class="form-group"><label>Sueño Profundo (min)</label><input type="number" id="rDeep" placeholder="60"/></div>
+        <div class="form-group"><label>Ayuno</label>
+          <select id="rIF"><option value="">—</option><option>16:8</option><option>18:6</option><option>20:4</option><option>24h</option><option>No</option></select>
+        </div>
+        <div class="form-group"><label>SpO2 %</label><input type="number" id="rSpO2" placeholder="98"/></div>
+        <div class="form-group"><label>Notas</label><input type="text" id="rNotas" placeholder="Sensaciones del día..."/></div>
+      </div>
+      <div style="margin-top:14px;">
+        <label>SUPLEMENTOS TOMADOS</label>
+        <div class="supps-grid" id="suppsGrid">
+          <span class="supp-chip" data-s="Creatina">Creatina 5g</span><span class="supp-chip" data-s="NMN">NMN 500mg</span>
+          <span class="supp-chip" data-s="Resveratrol">Resveratrol</span><span class="supp-chip" data-s="Berberina">Berberina</span>
+          <span class="supp-chip" data-s="Omega3">Omega-3</span><span class="supp-chip" data-s="Vit D3">Vit D3+K2</span>
+          <span class="supp-chip" data-s="Magnesio">Magnesio</span><span class="supp-chip" data-s="Zinc">Zinc</span>
+          <span class="supp-chip" data-s="CoQ10">CoQ10</span><span class="supp-chip" data-s="Metformina">Metformina</span>
+          <span class="supp-chip" data-s="Proteína">Proteína whey</span><span class="supp-chip" data-s="Colágeno">Colágeno</span>
+        </div>
+      </div>
+      <div style="margin-top:16px;"><button class="btn btn-glow" onclick="addLog()">+ GUARDAR REGISTRO</button></div>
+    </div>
+  </div>
+
+  <!-- BIOMETRÍA -->
+  <div id="pane-bio" class="pane">
+    <div class="sec-hdr">COMPOSICIÓN CORPORAL</div>
+    <div class="grid cols-4">
+      <div class="card"><div class="lbl">Peso Actual</div><div class="val" id="bW">—</div><div class="lbl">kg</div><div class="bar-wrap" style="margin-top:8px"><div class="bar-fill" style="width:60%;background:var(--glow)"></div></div><div class="lbl" style="margin-top:4px">Meta: 68 kg</div></div>
+      <div class="card"><div class="lbl">Body Fat</div><div class="val" id="bBF" style="color:var(--glow4)">—</div><div class="lbl">% → Meta 10%</div><div class="bar-wrap" style="margin-top:8px"><div class="bar-fill" id="bfBar" style="width:0%;background:var(--glow4)"></div></div><div class="lbl" style="margin-top:4px">Grasa: <span id="bFatKg">—</span> kg</div></div>
+      <div class="card"><div class="lbl">Masa Magra</div><div class="val" id="bLBM" style="color:var(--glow2)">—</div><div class="lbl">kg LBM</div><div class="lbl" style="margin-top:8px">Referencia 2017: <b>72.7 kg</b></div><div class="lbl">Pérdida desde peak: <span id="bDelta" style="color:var(--glow3)">—</span> kg</div></div>
+      <div class="card"><div class="lbl">Grasa a Perder</div><div class="val" id="bFatLose" style="color:var(--glow3)">—</div><div class="lbl">kg hasta 10% BF</div><div class="lbl" style="margin-top:8px">Peso objetivo: <span id="bTarget" style="color:var(--glow2);font-weight:700">—</span> kg</div><div class="lbl">Proyección: <span id="bWeeks" style="color:var(--glow)">—</span> semanas</div></div>
+    </div>
+    <div class="sec-hdr">EVOLUCIÓN</div>
+    <div class="card"><div class="card-title">PESO & BODY FAT HISTÓRICO</div><canvas id="chartBioEvo" height="120"></canvas></div>
+    <div class="sec-hdr">REFERENCIAS CLAVE</div>
+    <div class="grid cols-3">
+      <div class="card"><div class="card-title">ESTADO ACTUAL vs PEAK</div>
+        <div class="bm-row"><span class="bm-name">Peso Actual</span><span class="val-sm" id="refPeso">— kg</span></div>
+        <div class="bm-row"><span class="bm-name">Peso 2017 (peak)</span><span class="val-sm" style="color:var(--muted)">93 kg</span></div>
+        <div class="bm-row"><span class="bm-name">LBM 2017</span><span class="val-sm" style="color:var(--glow2)">72.7 kg</span></div>
+        <div class="bm-row"><span class="bm-name">BF 2017</span><span class="val-sm" style="color:var(--glow3)">21.8%</span></div>
+      </div>
+      <div class="card"><div class="card-title">TARGETS DIARIOS</div>
+        <div class="bm-row"><span class="bm-name">Calorías déficit</span><span class="val-sm">1,800–1,900 kcal</span></div>
+        <div class="bm-row"><span class="bm-name">Proteína mínima</span><span class="val-sm" style="color:var(--glow2)">132g</span></div>
+        <div class="bm-row"><span class="bm-name">Pasos diarios</span><span class="val-sm">10,000+</span></div>
+        <div class="bm-row"><span class="bm-name">Agua mínima</span><span class="val-sm">3.0 L</span></div>
+      </div>
+      <div class="card"><div class="card-title">HRV & RECUPERACIÓN</div>
+        <div class="bm-row"><span class="bm-name">HRV baseline</span><span class="val-sm">~55ms</span></div>
+        <div class="bm-row"><span class="bm-name">FC Reposo target</span><span class="val-sm">&lt;55 bpm</span></div>
+        <div class="bm-row"><span class="bm-name">SpO2 mínimo</span><span class="val-sm">96%+</span></div>
+        <div class="bm-row"><span class="bm-name">Sueño profundo</span><span class="val-sm">&gt;15%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROTOCOLOS -->
+  <div id="pane-proto" class="pane">
+    <div class="sec-hdr">TIMELINE DEL DÍA</div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="tl-item"><div class="tl-time">06:00</div><div class="tl-dot"></div><div class="tl-content"><div class="tl-title">Despertar & Luz Solar</div><div class="tl-desc">Exposición luz 5–10min</div></div></div>
+        <div class="tl-item"><div class="tl-time">06:05</div><div class="tl-dot" style="border-color:var(--oura)"></div><div class="tl-content"><div class="tl-title">AM Stack</div><div class="tl-desc">NMN · Resveratrol · D3+K2 · CoQ10 · Omega-3</div></div></div>
+        <div class="tl-item"><div class="tl-time">07:00</div><div class="tl-dot" style="border-color:var(--glow2)"></div><div class="tl-content"><div class="tl-title">Entrenamiento</div><div class="tl-desc">Zona 2 / Running / Fuerza · Creatina 5g</div></div></div>
+        <div class="tl-item"><div class="tl-time">09:30</div><div class="tl-dot" style="border-color:var(--glow2)"></div><div class="tl-content"><div class="tl-title">Romper Ayuno</div><div class="tl-desc">40–50g proteína</div></div></div>
+        <div class="tl-item"><div class="tl-time">13:00</div><div class="tl-dot"></div><div class="tl-content"><div class="tl-title">Almuerzo Principal</div><div class="tl-desc">50g proteína · Carbos complejos</div></div></div>
+        <div class="tl-item"><div class="tl-time">16:00</div><div class="tl-dot" style="border-color:var(--glow4)"></div><div class="tl-content"><div class="tl-title">Snack & Cierre ventana</div><div class="tl-desc">30g proteína · Cierre 17:30</div></div></div>
+      </div>
+      <div class="card">
+        <div class="tl-item"><div class="tl-time">17:30</div><div class="tl-dot" style="border-color:var(--glow3)"></div><div class="tl-content"><div class="tl-title">Inicio Ayuno</div><div class="tl-desc">Solo agua, té, café negro</div></div></div>
+        <div class="tl-item"><div class="tl-time">18:00</div><div class="tl-dot"></div><div class="tl-content"><div class="tl-title">Caminata NEAT</div><div class="tl-desc">30–45min · 10k pasos</div></div></div>
+        <div class="tl-item"><div class="tl-time">20:30</div><div class="tl-dot" style="border-color:var(--oura)"></div><div class="tl-content"><div class="tl-title">PM Stack</div><div class="tl-desc">Magnesio 400mg · Zinc · Berberina</div></div></div>
+        <div class="tl-item"><div class="tl-time">21:00</div><div class="tl-dot" style="border-color:var(--oura)"></div><div class="tl-content"><div class="tl-title">Wind Down</div><div class="tl-desc">Luz cálida · Sin pantallas</div></div></div>
+        <div class="tl-item"><div class="tl-time">21:30</div><div class="tl-dot" style="border-color:var(--glow)"></div><div class="tl-content"><div class="tl-title">Ducha Fría</div><div class="tl-desc">2–3min · Mejora HRV</div></div></div>
+        <div class="tl-item"><div class="tl-time">22:00</div><div class="tl-dot" style="border-color:var(--glow2)"></div><div class="tl-content"><div class="tl-title">Sueño</div><div class="tl-desc">Target 8h · 18–19°C · Oura activo</div></div></div>
+      </div>
+    </div>
+    <div class="sec-hdr">PROTOCOLOS</div>
+    <div class="grid cols-3">
+      <div class="card"><div class="card-title" style="color:var(--glow2)">ZONA 2 CARDIO</div><div class="tl-desc" style="font-size:11px;line-height:1.6">45–60 min · FC 110–130 bpm · 3–4x/sem<br><span class="tag tag-ok" style="margin-top:6px;display:inline-block">PRIORIDAD ALTA</span></div></div>
+      <div class="card"><div class="card-title" style="color:var(--glow)">FRÍO TERAPÉUTICO</div><div class="tl-desc" style="font-size:11px;line-height:1.6">Ducha fría 3min · Baño hielo 10–15°C<br><span class="tag tag-info" style="margin-top:6px;display:inline-block">DIARIO</span></div></div>
+      <div class="card"><div class="card-title" style="color:var(--glow4)">SAUNA</div><div class="tl-desc" style="font-size:11px;line-height:1.6">80–100°C · 20min × 3 sesiones<br><span class="tag tag-warn" style="margin-top:6px;display:inline-block">2–3x SEMANA</span></div></div>
+      <div class="card"><div class="card-title" style="color:var(--glow3)">FUERZA PROGRESIVA</div><div class="tl-desc" style="font-size:11px;line-height:1.6">3–4x/semana · Creatina 5g · &gt;1.7g/kg LBM<br><span class="tag tag-danger" style="margin-top:6px;display:inline-block">CRÍTICO</span></div></div>
+      <div class="card"><div class="card-title" style="color:var(--oura)">AYUNO INTERMITENTE</div><div class="tl-desc" style="font-size:11px;line-height:1.6">16:8 base · 18:6 óptimo<br><span class="tag" style="border-color:var(--oura);color:var(--oura);margin-top:6px;display:inline-block">DIARIO</span></div></div>
+      <div class="card"><div class="card-title" style="color:var(--glow)">SUEÑO OPTIMIZADO</div><div class="tl-desc" style="font-size:11px;line-height:1.6">8h target · Magnesio · &gt;15% sueño profundo<br><span class="tag tag-ok" style="margin-top:6px;display:inline-block">FUNDAMENTO</span></div></div>
+    </div>
+  </div>
+
+  <!-- BIOMARKERS -->
+  <div id="pane-markers" class="pane">
+    <div class="sec-hdr">PANEL ANALÍTICA — LONGEVIDAD</div>
+    <div class="grid cols-2">
+      <div class="card"><div class="card-title">HORMONAS & PERFORMANCE</div><div id="bmHorm"></div></div>
+      <div class="card"><div class="card-title">METABÓLICO & INFLAMACIÓN</div><div id="bmMeta"></div></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card"><div class="card-title">VITAMINAS & MINERALES</div><div id="bmVit"></div></div>
+      <div class="card"><div class="card-title">RECUPERACIÓN DIARIA (Oura)</div><div id="bmOura"></div></div>
+    </div>
+    <div style="margin-top:12px;padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+      <div class="lbl" style="margin-bottom:8px">AGREGAR RESULTADO</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Marcador</label><input type="text" id="bmName" placeholder="Testosterona"/></div>
+        <div class="form-group"><label>Valor</label><input type="number" id="bmVal" step="0.01"/></div>
+        <div class="form-group"><label>Unidad</label><input type="text" id="bmUnit" placeholder="ng/dL"/></div>
+        <div class="form-group"><label>Rango Óptimo</label><input type="text" id="bmRange" placeholder="600–900"/></div>
+        <div class="form-group"><label>Estado</label><select id="bmStatus"><option value="ok">Óptimo ✅</option><option value="warn">Atención ⚠️</option><option value="danger">Bajo/Alto 🔴</option></select></div>
+      </div>
+      <button class="btn btn-glow" style="margin-top:10px" onclick="addBiomarker()">+ AGREGAR</button>
+    </div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div id="pane-history" class="pane">
+    <div class="sec-hdr">HISTORIAL COMPLETO</div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>FECHA</th><th>PESO</th><th>BF%</th><th>KCAL</th><th>PROT</th><th>HRV</th><th>SUEÑO</th><th>PASOS</th><th>ACTIVIDAD</th><th>SCORE</th><th></th></tr></thead>
+          <tbody id="histTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======== STATE ========
+let logs = JSON.parse(localStorage.getItem('ba53logs')||'[]');
+let gymLogs = JSON.parse(localStorage.getItem('ba53gym')||'[]');
+let biomarkers = JSON.parse(localStorage.getItem('ba53bm')||'null') || getDefaultBM();
+let stravaActivities = [];
+let cachedJSON = null;
+let chartW,chartM,chartBio,chartWV,chartPace;
+
+function saveLogs(){localStorage.setItem('ba53logs',JSON.stringify(logs));}
+function saveGym(){localStorage.setItem('ba53gym',JSON.stringify(gymLogs));}
+function saveBM(){localStorage.setItem('ba53bm',JSON.stringify(biomarkers));}
+
+function getDefaultBM(){
+  return{
+    horm:[{name:'Testosterona Total',val:null,unit:'ng/dL',range:'600–900',status:'ok'},{name:'IGF-1',val:null,unit:'ng/mL',range:'150–250',status:'ok'},{name:'Cortisol AM',val:null,unit:'μg/dL',range:'8–15',status:'ok'},{name:'TSH',val:null,unit:'mIU/L',range:'0.5–2.0',status:'ok'}],
+    meta:[{name:'HbA1c',val:null,unit:'%',range:'<5.4',status:'ok'},{name:'Glucosa Ayuno',val:null,unit:'mg/dL',range:'72–90',status:'ok'},{name:'PCR Ultrasensible',val:null,unit:'mg/L',range:'<0.5',status:'ok'},{name:'Triglicéridos',val:null,unit:'mg/dL',range:'<100',status:'ok'}],
+    vit:[{name:'Vitamina D3',val:null,unit:'ng/mL',range:'50–80',status:'ok'},{name:'Vitamina B12',val:null,unit:'pg/mL',range:'400–900',status:'ok'},{name:'Ferritina',val:null,unit:'ng/mL',range:'50–150',status:'ok'},{name:'Zinc sérico',val:null,unit:'μg/dL',range:'80–120',status:'ok'}]
+  };
+}
+
+// ======== LOAD STRAVA DATA (public JSON) ========
+async function loadStravaData(){
+  try{
+    // Loads strava-data.json from same folder (committed to repo, no token needed)
+    const r = await fetch('./strava-data.json?v='+Date.now());
+    if(!r.ok) throw new Error('not found');
+    const data = await r.json();
+    stravaActivities = data.activities || [];
+    document.getElementById('stravaLastSync').textContent =
+      `⚡ Santiago · Strava · Última sync: ${data.synced_at ? new Date(data.synced_at).toLocaleDateString('es-ES') : '—'}`;
+    document.getElementById('stravaStatus').innerHTML = '⚡ <span style="color:var(--strava)">STRAVA</span>';
+    renderActivities();
+    renderDashActivities();
+  }catch(e){
+    document.getElementById('stravaLastSync').textContent = 'Sin datos Strava — propietario: sincroniza y sube strava-data.json';
+    document.getElementById('dashActivities').innerHTML = '<div style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">Sin actividades Strava aún. Sube strava-data.json al repo.</div>';
+  }
+}
+
+// ======== OWNER: fetch from Strava API & export JSON ========
+function toggleOwnerPanel(){
+  const p = document.getElementById('ownerPanel');
+  p.style.display = p.style.display==='none' ? 'block' : 'none';
+}
+
+async function stravaConnectAndSync(){
+  const token = document.getElementById('stravaManualToken').value.trim();
+  if(!token){alert('Ingresa tu Access Token');return;}
+  try{
+    const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=60&page=1',{
+      headers:{Authorization:`Bearer ${token}`}
+    });
+    if(r.status===401){alert('Token inválido o expirado');return;}
+    const acts = await r.json();
+    const athlete = await (await fetch('https://www.strava.com/api/v3/athlete',{headers:{Authorization:`Bearer ${token}`}})).json();
+    cachedJSON = {
+      synced_at: new Date().toISOString(),
+      athlete: {name:`${athlete.firstname} ${athlete.lastname}`, id: athlete.id},
+      activities: acts
+    };
+    stravaActivities = acts;
+    renderActivities();
+    renderDashActivities();
+    document.getElementById('exportArea').style.display='block';
+    document.getElementById('stravaLastSync').textContent = `⚡ ${athlete.firstname} ${athlete.lastname} · Strava · LIVE`;
+  }catch(e){alert('Error: '+e.message);}
+}
+
+function downloadJSON(){
+  if(!cachedJSON) return;
+  const blob = new Blob([JSON.stringify(cachedJSON, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'strava-data.json';
+  a.click();
+}
+
+// ======== RENDER ACTIVITIES ========
+function fmtTime(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h>0?`${h}h ${m}m`:`${m}m`;}
+function fmtPace(mpm){const m=Math.floor(mpm),s=Math.round((mpm-m)*60);return`${m}'${String(s).padStart(2,'0')}"`;}
+function actIcon(t){return({'Run':'🏃','Ride':'🚴','Swim':'🏊','Walk':'🚶','Hike':'🥾','WeightTraining':'🏋️','Workout':'💪'})[t]||'⚡';}
+function actColor(t){return({'Run':'var(--glow2)','Ride':'var(--glow)','Swim':'var(--oura)','WeightTraining':'var(--glow3)','Workout':'var(--glow3)','Hike':'var(--glow4)'})[t]||'var(--strava)';}
+function getWeekKey(d){const dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()-dt.getDay()+1);return dt.toISOString().slice(0,10);}
+
+function renderActivities(){
+  if(!stravaActivities.length) return;
+  const now=new Date();
+  const mActs=stravaActivities.filter(a=>{const d=new Date(a.start_date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  document.getElementById('fKmMonth').textContent=mActs.filter(a=>a.sport_type==='Run'||a.sport_type==='Ride').reduce((s,a)=>s+a.distance/1000,0).toFixed(1);
+  document.getElementById('fActMonth').textContent=mActs.length;
+  document.getElementById('fTimeMonth').textContent=(mActs.reduce((s,a)=>s+a.moving_time,0)/3600).toFixed(1);
+  document.getElementById('fElevMonth').textContent=Math.round(mActs.reduce((s,a)=>s+(a.total_elevation_gain||0),0));
+
+  const weeks={};
+  stravaActivities.forEach(a=>{const wk=getWeekKey(a.start_date);if(!weeks[wk])weeks[wk]=0;if(a.distance)weeks[wk]+=a.distance/1000;});
+  const wkL=Object.keys(weeks).sort().slice(-8);
+  if(chartWV)chartWV.destroy();
+  chartWV=new Chart(document.getElementById('chartWeeklyVol'),{type:'bar',data:{labels:wkL.map(w=>w.slice(5)),datasets:[{label:'km',data:wkL.map(k=>+weeks[k].toFixed(1)),backgroundColor:'rgba(252,76,2,.6)',borderColor:'var(--strava)',borderWidth:1}]},options:{responsive:true,plugins:{legend:{labels:{color:'#4a7a96'}}},scales:{x:{ticks:{color:'#4a7a96',font:{size:8}}},y:{ticks:{color:'#4a7a96',font:{size:8}}}}}});
+
+  const runs=stravaActivities.filter(a=>a.sport_type==='Run'&&a.distance>0&&a.moving_time>0).slice(0,10).reverse();
+  if(chartPace)chartPace.destroy();
+  chartPace=new Chart(document.getElementById('chartPace'),{type:'line',data:{labels:runs.map(a=>new Date(a.start_date).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'})),datasets:[{label:'min/km',data:runs.map(a=>(a.moving_time/60)/(a.distance/1000)),borderColor:'var(--glow2)',backgroundColor:'rgba(0,255,157,.05)',tension:.4,pointRadius:4,pointBackgroundColor:'var(--glow2)'}]},options:{responsive:true,plugins:{legend:{labels:{color:'#4a7a96'}}},scales:{x:{ticks:{color:'#4a7a96',font:{size:8}}},y:{reverse:true,ticks:{color:'#4a7a96',font:{size:8},callback:v=>fmtPace(v)}}}}});
+
+  document.getElementById('activitiesList').innerHTML=stravaActivities.slice(0,20).map(a=>{
+    const col=actColor(a.sport_type);
+    return`<div class="act-card">
+      <div class="act-header">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">${actIcon(a.sport_type)}</span>
+          <div><div class="act-title">${a.name}</div><div style="font-family:var(--font-mono);font-size:9px;color:var(--muted)">${new Date(a.start_date).toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'})}</div></div>
+        </div>
+        <span class="tag" style="color:${col};border-color:${col};background:rgba(0,0,0,.3)">${a.sport_type||'Activity'}</span>
+      </div>
+      <div class="act-stats">
+        ${a.distance?`<div class="act-stat">DIST <span>${(a.distance/1000).toFixed(2)} km</span></div>`:''}
+        <div class="act-stat">TIEMPO <span>${fmtTime(a.moving_time)}</span></div>
+        ${(a.sport_type==='Run'&&a.distance>0)?`<div class="act-stat">RITMO <span>${fmtPace((a.moving_time/60)/(a.distance/1000))}</span></div>`:''}
+        ${a.total_elevation_gain?`<div class="act-stat">DESNIVEL <span>↑${Math.round(a.total_elevation_gain)}m</span></div>`:''}
+        ${a.average_heartrate?`<div class="act-stat">FC <span>${Math.round(a.average_heartrate)}${a.max_heartrate?' / '+Math.round(a.max_heartrate):''} bpm</span></div>`:''}
+        ${a.suffer_score?`<div class="act-stat">SUFFER <span style="color:var(--glow3)">${a.suffer_score}</span></div>`:''}
+        ${a.average_cadence?`<div class="act-stat">CADENCIA <span>${Math.round(a.average_cadence*2)} rpm</span></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderDashActivities(){
+  if(!stravaActivities.length) return;
+  document.getElementById('dashActivities').innerHTML=`<div class="grid cols-3">${stravaActivities.slice(0,3).map(a=>`<div class="card" style="border-color:rgba(252,76,2,.2)"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span>${actIcon(a.sport_type)}</span><span style="font-weight:700;font-size:12px">${a.name}</span></div><div class="act-stats">${a.distance?`<div class="act-stat">DIST <span>${(a.distance/1000).toFixed(2)}km</span></div>`:''}<div class="act-stat">TIEMPO <span>${fmtTime(a.moving_time)}</span></div>${a.average_heartrate?`<div class="act-stat">FC <span>${Math.round(a.average_heartrate)}</span></div>`:''}</div></div>`).join('')}</div>`;
+}
+
+// ======== GYM ========
+function addExerciseRow(){
+  const row=document.createElement('div');row.className='exercise-row';
+  row.innerHTML=`<input type="text" placeholder="Ejercicio" style="flex:2"/><input type="number" placeholder="Series" style="width:70px;flex:none"/><input type="number" placeholder="Reps" style="width:70px;flex:none"/><input type="number" placeholder="kg" style="width:70px;flex:none"/><span style="font-family:var(--font-mono);font-size:9px;color:var(--muted)">RPE</span><input type="number" placeholder="8" style="width:50px;flex:none" min="1" max="10"/><button class="btn btn-danger" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('gymExercises').appendChild(row);
+}
+function saveGymSession(){
+  const rows=[...document.querySelectorAll('#gymExercises .exercise-row')];
+  const exercises=rows.map(r=>{const ins=[...r.querySelectorAll('input')];return{name:ins[0].value,sets:ins[1].value,reps:ins[2].value,kg:ins[3].value,rpe:ins[4]?.value};}).filter(e=>e.name);
+  gymLogs.push({fecha:document.getElementById('gymFecha').value||new Date().toISOString().slice(0,10),tipo:document.getElementById('gymTipo').value,dur:document.getElementById('gymDur').value,rpe:document.getElementById('gymRPE').value,fc:document.getElementById('gymFC').value,notes:document.getElementById('gymNotes').value,exercises});
+  saveGym();renderGymHistory();alert('✅ Sesión gym guardada');
+}
+function renderGymHistory(){
+  const tbody=document.getElementById('gymHistTbody');
+  if(!gymLogs.length){tbody.innerHTML=`<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:20px">Sin sesiones aún</td></tr>`;return;}
+  tbody.innerHTML=[...gymLogs].reverse().map((g,ri)=>{const i=gymLogs.length-1-ri;return`<tr><td style="color:var(--muted)">${g.fecha}</td><td style="color:var(--glow3)">${g.tipo}</td><td>${g.dur||'—'} min</td><td><span class="tag ${g.rpe>=8?'tag-danger':g.rpe>=6?'tag-warn':'tag-ok'}">${g.rpe||'—'}/10</span></td><td style="color:var(--muted);font-size:9px">${g.exercises.map(e=>`${e.name} ${e.sets}×${e.reps}${e.kg?'@'+e.kg+'kg':''}`).join(' · ').substring(0,60)||'—'}</td><td style="color:var(--muted);font-size:9px">${g.notes||'—'}</td><td><button class="btn btn-danger" onclick="delGym(${i})">✕</button></td></tr>`;}).join('');
+}
+function delGym(i){if(!confirm('¿Eliminar sesión?'))return;gymLogs.splice(i,1);saveGym();renderGymHistory();}
+
+// ======== BIO SCORE ========
+function calcScore(l){let s=0,n=0;const add=(v,t,w)=>{if(v){s+=Math.min(v/t,1)*w;n+=w;}};if(l.kcal){const d=Math.abs(l.kcal-1800);s+=Math.max(0,1-d/600)*25;n+=25;}add(l.prot,132,15);add(l.pasos,10000,15);add(l.sleep,7.5,20);if(l.sq){s+=l.sq/10*10;n+=10;}add(l.hrv,50,15);return n>0?Math.round(s/n*100):0;}
+function calcScoreBreakdown(l){return[{lbl:'Nutrición',pct:l.kcal&&l.prot?Math.min(Math.round(((l.prot/132*.5)+(1-Math.abs(l.kcal-1800)/600)*.5)*100),100):0,col:'#00d4ff'},{lbl:'Actividad',pct:l.pasos?Math.min(Math.round(l.pasos/10000*100),100):0,col:'#00ff9d'},{lbl:'Sueño',pct:l.sleep?Math.min(Math.round((l.sleep/7.5*.6+(l.sq||5)/10*.4)*100),100):0,col:'#c084fc'},{lbl:'Recuperación',pct:l.hrv?Math.min(Math.round(l.hrv/50*100),100):0,col:'#ffd60a'}];}
+
+// ======== DASHBOARD ========
+function renderDash(){
+  const last=logs.length?logs[logs.length-1]:null;
+  if(last){
+    document.getElementById('kW').textContent=last.peso||'—';
+    document.getElementById('kBF').textContent=last.bf||'—';
+    if(last.peso&&last.bf)document.getElementById('kLBM').textContent=(last.peso*(1-last.bf/100)).toFixed(1);
+    document.getElementById('kHRV').textContent=last.hrv||'—';
+    document.getElementById('kSleep').textContent=last.sleep||'—';
+    document.getElementById('kKcal').textContent=last.kcal||'—';
+    document.getElementById('kProt').textContent=last.prot||'—';
+    document.getElementById('kSteps').textContent=last.pasos?(last.pasos/1000).toFixed(1)+'k':'—';
+    document.getElementById('kRHR').textContent=last.rhr||'—';
+    document.getElementById('kWater').textContent=last.water||'—';
+    document.getElementById('hdrW').textContent=last.peso||'—';
+    document.getElementById('hdrHRV').textContent=last.hrv||'—';
+    const sc=calcScore(last);
+    document.getElementById('ringCircle').style.strokeDashoffset=264-(sc/100)*264;
+    document.getElementById('ringText').textContent=sc;
+    document.getElementById('scoreBreakdown').innerHTML=calcScoreBreakdown(last).map(b=>`<div class="score-row"><span class="score-label">${b.lbl}</span><div class="score-bar"><div class="score-bar-fill" style="width:${b.pct}%;background:${b.col}"></div></div><span class="score-num" style="color:${b.col}">${b.pct}</span></div>`).join('');
+    if(last.bf&&last.peso){const lbm=last.peso*(1-last.bf/100),tW=lbm/.9,ftl=last.peso-tW,wks=Math.round(ftl/.5);document.getElementById('bfGoalPanel').innerHTML=`<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px"><div class="bm-row"><span class="bm-name">LBM actual</span><span class="val-sm" style="color:var(--glow2)">${lbm.toFixed(1)} kg</span></div><div class="bm-row"><span class="bm-name">Peso objetivo</span><span class="val-sm" style="color:var(--glow)">${tW.toFixed(1)} kg</span></div><div class="bm-row"><span class="bm-name">Grasa a perder</span><span class="val-sm" style="color:var(--glow3)">${ftl.toFixed(1)} kg</span></div><div class="bm-row"><span class="bm-name">Proyección</span><span class="val-sm" style="color:var(--glow4)">${wks} semanas</span></div></div>`;}
+  }
+  const labels=logs.map(l=>l.fecha.slice(5));
+  if(chartW)chartW.destroy();if(chartM)chartM.destroy();
+  const co={responsive:true,plugins:{legend:{labels:{color:'#4a7a96',font:{size:10}}}}};
+  chartW=new Chart(document.getElementById('chartW'),{type:'line',data:{labels,datasets:[{label:'Peso kg',data:logs.map(l=>l.peso),borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,.05)',tension:.4,pointRadius:3}]},options:{...co,scales:{x:{ticks:{color:'#4a7a96',font:{size:9}}},y:{ticks:{color:'#4a7a96',font:{size:9}}}}}});
+  chartM=new Chart(document.getElementById('chartM'),{type:'bar',data:{labels,datasets:[{label:'Proteína',data:logs.map(l=>l.prot),backgroundColor:'rgba(0,255,157,.7)'},{label:'Carbos',data:logs.map(l=>l.carbs),backgroundColor:'rgba(0,212,255,.5)'},{label:'Grasas',data:logs.map(l=>l.fat),backgroundColor:'rgba(255,214,10,.5)'}]},options:{...co,scales:{x:{ticks:{color:'#4a7a96',font:{size:9}}},y:{ticks:{color:'#4a7a96',font:{size:9}}}}}});
+  if(stravaActivities.length) renderDashActivities();
+}
+
+// ======== BIO ========
+function renderBio(){
+  if(!logs.length)return;
+  const last=logs[logs.length-1];
+  if(last.peso){document.getElementById('bW').textContent=last.peso;document.getElementById('refPeso').textContent=last.peso+' kg';}
+  if(last.bf){
+    const lbm=last.peso*(1-last.bf/100),fk=last.peso-lbm,tW=lbm/.9,ftl=last.peso-tW;
+    document.getElementById('bBF').textContent=last.bf;
+    document.getElementById('bfBar').style.width=Math.min(last.bf/30*100,100)+'%';
+    document.getElementById('bLBM').textContent=lbm.toFixed(1);
+    document.getElementById('bFatKg').textContent=fk.toFixed(1);
+    document.getElementById('bFatLose').textContent=ftl.toFixed(1);
+    document.getElementById('bTarget').textContent=tW.toFixed(1);
+    document.getElementById('bWeeks').textContent=Math.round(ftl/.5);
+    document.getElementById('bDelta').textContent=(72.7-lbm).toFixed(1);
+  }
+  const labels=logs.map(l=>l.fecha.slice(5));
+  if(chartBio)chartBio.destroy();
+  chartBio=new Chart(document.getElementById('chartBioEvo'),{type:'line',data:{labels,datasets:[{label:'Peso kg',data:logs.map(l=>l.peso),borderColor:'#00d4ff',tension:.4,yAxisID:'y'},{label:'BF %',data:logs.map(l=>l.bf),borderColor:'#ffd60a',tension:.4,yAxisID:'y1'}]},options:{responsive:true,plugins:{legend:{labels:{color:'#4a7a96'}}},scales:{x:{ticks:{color:'#4a7a96',font:{size:9}}},y:{position:'left',ticks:{color:'#00d4ff',font:{size:9}}},y1:{position:'right',ticks:{color:'#ffd60a',font:{size:9}},grid:{drawOnChartArea:false}}}}});
+}
+
+// ======== BIOMARKERS ========
+function renderBiomarkers(){
+  [{id:'bmHorm',key:'horm'},{id:'bmMeta',key:'meta'},{id:'bmVit',key:'vit'}].forEach(({id,key})=>{document.getElementById(id).innerHTML=biomarkers[key].map(bm=>`<div class="bm-row"><span class="bm-name">${bm.name}</span><span class="tag tag-${bm.status}">${bm.val||'—'} ${bm.unit}</span><span class="bm-range">${bm.range}</span></div>`).join('');});
+  const last=logs.length?logs[logs.length-1]:null;
+  document.getElementById('bmOura').innerHTML=`<div class="bm-row"><span class="bm-name">HRV Nocturno</span><span class="tag ${last?.hrv>=55?'tag-ok':last?.hrv>0?'tag-warn':'tag-info'}">${last?.hrv||'—'} ms</span></div><div class="bm-row"><span class="bm-name">FC Reposo</span><span class="tag ${last?.rhr<=55?'tag-ok':last?.rhr>0?'tag-warn':'tag-info'}">${last?.rhr||'—'} bpm</span></div><div class="bm-row"><span class="bm-name">Sueño Total</span><span class="tag tag-info">${last?.sleep||'—'} h</span></div><div class="bm-row"><span class="bm-name">REM</span><span class="tag tag-info">${last?.rem||'—'} min</span></div><div class="bm-row"><span class="bm-name">Sueño Profundo</span><span class="tag tag-info">${last?.deep||'—'} min</span></div><div class="bm-row"><span class="bm-name">SpO2</span><span class="tag ${last?.spo2>=96?'tag-ok':'tag-warn'}">${last?.spo2||'—'} %</span></div>`;
+}
+function addBiomarker(){
+  const name=document.getElementById('bmName').value.trim(),val=document.getElementById('bmVal').value,unit=document.getElementById('bmUnit').value.trim(),range=document.getElementById('bmRange').value.trim(),status=document.getElementById('bmStatus').value;
+  if(!name||!val)return;
+  if(!biomarkers.custom)biomarkers.custom=[];
+  biomarkers.custom.push({name,val:parseFloat(val),unit,range,status});
+  saveBM();renderBiomarkers();
+  ['bmName','bmVal','bmUnit','bmRange'].forEach(id=>document.getElementById(id).value='');
+}
+
+// ======== LOG ========
+function addLog(){
+  const g=id=>document.getElementById(id).value;
+  logs.push({fecha:g('rFecha')||new Date().toISOString().slice(0,10),peso:parseFloat(g('rPeso'))||null,bf:parseFloat(g('rBF'))||null,kcal:parseInt(g('rKcal'))||null,prot:parseInt(g('rProt'))||null,carbs:parseInt(g('rCarbs'))||null,fat:parseInt(g('rFat'))||null,water:parseFloat(g('rWater'))||null,act:g('rAct'),km:parseFloat(g('rKm'))||null,pasos:parseInt(g('rPasos'))||null,hrv:parseInt(g('rHRV'))||null,rhr:parseInt(g('rRHR'))||null,sleep:parseFloat(g('rSleep'))||null,sq:parseInt(g('rSQ'))||null,rem:parseInt(g('rREM'))||null,deep:parseInt(g('rDeep'))||null,spo2:parseInt(g('rSpO2'))||null,notes:g('rNotas'),supps:[...document.querySelectorAll('.supp-chip.sel')].map(c=>c.dataset.s)});
+  saveLogs();document.querySelectorAll('.supp-chip').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('rFecha').value=new Date().toISOString().slice(0,10);
+  alert('✅ Registro guardado');renderDash();
+}
+
+// ======== HISTORY ========
+function renderHistory(){
+  const tbody=document.getElementById('histTbody');
+  if(!logs.length){tbody.innerHTML=`<tr><td colspan="11" style="color:var(--muted);text-align:center;padding:20px">Sin registros aún</td></tr>`;return;}
+  tbody.innerHTML=[...logs].reverse().map((l,ri)=>{const i=logs.length-1-ri,sc=calcScore(l);return`<tr><td style="color:var(--muted)">${l.fecha}</td><td>${l.peso||'—'}</td><td style="color:${l.bf<=15?'var(--glow2)':l.bf<=20?'var(--glow4)':'var(--glow3)'}">${l.bf||'—'}%</td><td>${l.kcal||'—'}</td><td><span class="tag ${l.prot>=132?'tag-ok':'tag-warn'}">${l.prot||'—'}g</span></td><td style="color:${l.hrv>=55?'var(--glow2)':l.hrv>0?'var(--glow4)':'var(--muted)'}">${l.hrv||'—'}</td><td>${l.sleep||'—'}h</td><td>${l.pasos?(l.pasos/1000).toFixed(1)+'k':'—'}</td><td style="color:var(--muted)">${l.act||'—'}</td><td><span class="tag ${sc>=75?'tag-ok':sc>=55?'tag-warn':'tag-danger'}">${sc}</span></td><td><button class="btn btn-danger" onclick="delLog(${i})">✕</button></td></tr>`;}).join('');
+}
+function delLog(i){if(!confirm('¿Eliminar?'))return;logs.splice(i,1);saveLogs();renderHistory();}
+
+// ======== TABS ========
+function showTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pane-'+id).classList.add('active');
+  if(id==='dash') renderDash();
+  if(id==='history') renderHistory();
+  if(id==='markers') renderBiomarkers();
+  if(id==='bio') renderBio();
+  if(id==='fitness') renderGymHistory();
+}
+
+document.querySelectorAll('.supp-chip').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('sel')));
+
+// ======== INIT ========
+document.getElementById('hdrDate').textContent=new Date().toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+document.getElementById('rFecha').value=new Date().toISOString().slice(0,10);
+document.getElementById('gymFecha').value=new Date().toISOString().slice(0,10);
+loadStravaData();
+renderDash();
+renderGymHistory();
+</script>
+</body>
+</html>
