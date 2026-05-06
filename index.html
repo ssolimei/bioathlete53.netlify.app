@@ -155,6 +155,39 @@ section:last-of-type{border-bottom:none;}
 .strava-error{background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.3);padding:14px 16px;font-family:var(--font-mono);font-size:11px;color:#ff4d6d;line-height:1.6;}
 .strava-error a{color:var(--glow);}
 
+/* MARATHON BRIEFING */
+.briefing{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:32px;}
+@media(max-width:900px){.briefing{grid-template-columns:1fr;}}
+.brief-card{background:linear-gradient(135deg,var(--panel) 0%,var(--surface) 100%);border:1px solid var(--border);padding:22px 24px;position:relative;overflow:hidden;}
+.brief-card.today{border-color:var(--signal);box-shadow:0 0 24px rgba(57,255,20,0.06);}
+.brief-card.today::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--signal);box-shadow:0 0 12px var(--signal);}
+.brief-card.week{border-color:#c084fc;box-shadow:0 0 24px rgba(192,132,252,0.06);}
+.brief-card.week::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:#c084fc;box-shadow:0 0 12px #c084fc;}
+.brief-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.brief-title{font-family:var(--font-mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);font-weight:700;}
+.brief-title .accent{color:var(--signal);}
+.brief-title.purple .accent{color:#c084fc;}
+.brief-stamp{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.brief-list{list-style:none;padding:0;margin:0;}
+.brief-list li{font-family:var(--font-mono);font-size:11px;color:var(--text);letter-spacing:.2px;line-height:1.7;padding:5px 0 5px 14px;position:relative;}
+.brief-list li::before{content:'›';position:absolute;left:0;color:var(--muted);font-weight:700;}
+.brief-list li .num{font-weight:800;color:var(--text);font-size:12px;}
+.brief-list li .num.green{color:var(--glow2);}
+.brief-list li .num.amber{color:var(--glow4);}
+.brief-list li .num.red{color:#ff4d6d;}
+.brief-list li .num.purple{color:#c084fc;}
+.brief-list li .num.signal{color:var(--signal);}
+.brief-list li .lbl{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-right:6px;}
+.brief-verdict{margin-top:14px;padding:10px 12px;background:var(--void);border-left:2px solid var(--signal);font-family:var(--font-mono);font-size:11px;line-height:1.6;color:var(--text);letter-spacing:.3px;}
+.brief-verdict.amber{border-left-color:var(--glow4);}
+.brief-verdict.red{border-left-color:#ff4d6d;}
+.brief-verdict.purple{border-left-color:#c084fc;}
+.brief-verdict strong{color:var(--signal);text-transform:uppercase;letter-spacing:1.5px;font-size:10px;display:block;margin-bottom:4px;}
+.brief-verdict.amber strong{color:var(--glow4);}
+.brief-verdict.red strong{color:#ff4d6d;}
+.brief-verdict.purple strong{color:#c084fc;}
+.brief-loading{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-align:center;padding:20px;}
+
 /* OURA MODULE */
 .oura-status{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
 .oura-status .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#c084fc;box-shadow:0 0 8px #c084fc;margin-right:6px;animation:pulse 2s infinite;}
@@ -301,6 +334,7 @@ footer p .accent{color:var(--glow);}
 </header>
 
 <nav class="nav">
+  <a href="#briefing" data-target="briefing">00 · Briefing</a>
   <a href="#body" data-target="body">01 · Body</a>
   <a href="#health" data-target="health">02 · Apple Health</a>
   <a href="#strava" data-target="strava">03 · Strava</a>
@@ -319,6 +353,33 @@ footer p .accent{color:var(--glow);}
       <span>BASELINE: <span>22.JUN.2017</span></span>
       <span>DELTA: <span style="color:var(--glow2)">−7.35KG / −3.5% BF / −2.5 BMI</span></span>
       <span>RACE: <span style="color:var(--signal)">PALMA 18.OCT.2026</span></span>
+    </div>
+  </section>
+
+  <section id="briefing">
+    <div class="section-head">
+      <div class="section-title">
+        <span class="section-num">00 //</span>
+        <span class="section-name" style="color:var(--signal)">Marathon Briefing</span>
+      </div>
+      <span class="section-desc">Cross-system readout &middot; Oura + Strava + Plan</span>
+    </div>
+
+    <div id="briefingContainer" class="briefing">
+      <div class="brief-card today">
+        <div class="brief-head">
+          <span class="brief-title">// TODAY <span class="accent">·</span> READOUT</span>
+          <span class="brief-stamp">loading...</span>
+        </div>
+        <div class="brief-loading">Cruzando datos de Oura + Strava...</div>
+      </div>
+      <div class="brief-card week">
+        <div class="brief-head">
+          <span class="brief-title purple">// WEEK <span class="accent">·</span> PLAN VS REAL</span>
+          <span class="brief-stamp">loading...</span>
+        </div>
+        <div class="brief-loading">Cruzando datos de Oura + Strava...</div>
+      </div>
     </div>
   </section>
 
@@ -1077,6 +1138,212 @@ window.addEventListener('scroll',()=>{
       }
     })
     .catch(err => showError('Network error: ' + err.message));
+})();
+
+/* ───────────────────────────────────────────────
+   MARATHON BRIEFING · Cross-system readout
+   ─────────────────────────────────────────────── */
+(function loadBriefing() {
+  const container = document.getElementById('briefingContainer');
+  if (!container) return;
+
+  // Plan reference (Marathon OS · W2 active · F1 Base)
+  const PLAN_W2 = { km_target: 20, sessions_target: 5, week_label: 'W2 · F1 BASE' };
+
+  function getMonday(d) {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(date.setDate(diff));
+  }
+
+  function fmtH(seconds) {
+    if (!seconds) return '—';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return `${h}h ${m.toString().padStart(2,'0')}m`;
+  }
+  function fmtKm(m) {
+    if (!m) return '0';
+    return (m / 1000).toFixed(1);
+  }
+  function pctClass(value, thresholds) {
+    // thresholds: {green: x, amber: y} — returns class
+    if (value >= thresholds.green) return 'green';
+    if (value >= thresholds.amber) return 'amber';
+    return 'red';
+  }
+
+  function renderError(msg) {
+    container.innerHTML = `
+      <div class="brief-card today">
+        <div class="brief-head"><span class="brief-title">// BRIEFING <span class="accent">·</span> ERROR</span></div>
+        <div class="brief-loading" style="color:#ff4d6d">${msg}</div>
+      </div>`;
+  }
+
+  Promise.all([
+    fetch('/.netlify/functions/oura').then(r => r.json().then(d => ({ ok: r.ok, data: d }))),
+    fetch('/.netlify/functions/strava').then(r => r.json().then(d => ({ ok: r.ok, data: d })))
+  ]).then(([ouraRes, stravaRes]) => {
+
+    const ouraOk = ouraRes.ok && ouraRes.data.nights;
+    const stravaOk = stravaRes.ok && stravaRes.data.activities;
+
+    if (!ouraOk && !stravaOk) {
+      renderError('Both Oura and Strava failed to load. Check sections 03 and 04.');
+      return;
+    }
+
+    // ──── TODAY block ────
+    const oura = ouraRes.data || {};
+    const nights = oura.nights || [];
+    const lastNight = nights[0]; // already sorted desc
+
+    // Last activity from Strava (most recent)
+    const acts = (stravaRes.data && stravaRes.data.activities) || [];
+    const lastAct = acts[0];
+
+    // Today's date check
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10);
+    const lastNightAge = lastNight ? Math.floor((Date.now() - new Date(lastNight.day).getTime()) / 86400000) : 999;
+
+    const todayItems = [];
+
+    // Sleep readout
+    if (lastNight) {
+      const score = lastNight.sleep_score;
+      const scoreClass = score >= 85 ? 'green' : score >= 70 ? 'signal' : score >= 60 ? 'amber' : 'red';
+      const dateLabel = lastNightAge === 0 ? 'Last night' : (lastNightAge === 1 ? 'Last night (yesterday)' : `${lastNightAge}d ago`);
+      todayItems.push(`<li><span class="lbl">${dateLabel}</span> Sleep score <span class="num ${scoreClass}">${score || '—'}</span> · <span class="num">${fmtH(lastNight.total_sleep_duration)}</span> total · ${lastNight.efficiency}% eff</li>`);
+      todayItems.push(`<li><span class="lbl">Stages</span> Deep <span class="num">${(lastNight.deep_sleep_duration/3600).toFixed(1)}h</span> · REM <span class="num">${(lastNight.rem_sleep_duration/3600).toFixed(1)}h</span> · Awake <span class="num">${(lastNight.awake_time/60).toFixed(0)}m</span></li>`);
+      todayItems.push(`<li><span class="lbl">Recovery</span> HRV <span class="num purple">${lastNight.average_hrv} ms</span> · RHR <span class="num">${lastNight.lowest_heart_rate} bpm</span> · ${lastNight.average_breath} br/min</li>`);
+    } else {
+      todayItems.push(`<li><span class="lbl">Sleep</span> No data available</li>`);
+    }
+
+    // Last activity readout
+    if (lastAct) {
+      const actDate = new Date(lastAct.start_date_local);
+      const actAge = Math.floor((Date.now() - actDate.getTime()) / 86400000);
+      const actLabel = actAge === 0 ? 'Today' : actAge === 1 ? 'Yesterday' : `${actAge}d ago`;
+      const distLabel = lastAct.distance ? `${fmtKm(lastAct.distance)} km` : '—';
+      const timeLabel = fmtH(lastAct.moving_time);
+      todayItems.push(`<li><span class="lbl">${actLabel}</span> ${lastAct.type || lastAct.sport_type} · <span class="num">${distLabel}</span> · ${timeLabel}${lastAct.average_heartrate ? ' · ' + Math.round(lastAct.average_heartrate) + ' bpm avg' : ''}</li>`);
+    } else {
+      todayItems.push(`<li><span class="lbl">Activity</span> No recent data</li>`);
+    }
+
+    // Verdict for TODAY (cross-system call)
+    let verdictClass = 'today';
+    let verdictTitle = 'GO · NORMAL EFFORT';
+    let verdictText = 'Recovery aceptable. Entrena según plan.';
+    if (lastNight) {
+      const score = lastNight.sleep_score;
+      const hrv = lastNight.average_hrv;
+      const avgHrv = oura.stats?.avg_hrv_ms || hrv;
+      const hrvDelta = hrv - avgHrv;
+
+      if (score < 60 || hrvDelta < -10) {
+        verdictClass = 'red';
+        verdictTitle = 'CAUTION · RECOVERY DAY';
+        verdictText = `Sleep score ${score} y HRV ${hrv}ms (Δ ${hrvDelta > 0 ? '+' : ''}${hrvDelta} vs base). Hoy: rodaje muy suave o descanso activo. Sin intervalos.`;
+      } else if (score < 75 || hrvDelta < -5) {
+        verdictClass = 'amber';
+        verdictTitle = 'YELLOW · MODERATE';
+        verdictText = `Recovery parcial. Score ${score}, HRV Δ ${hrvDelta > 0 ? '+' : ''}${hrvDelta}ms. Mantén intensidad baja-media; reserva calidad para mañana.`;
+      } else if (score >= 85 && hrvDelta >= 0) {
+        verdictClass = 'today';
+        verdictTitle = 'GREEN · PUSH OK';
+        verdictText = `Sistemas en verde. Score ${score}, HRV +${Math.max(0, hrvDelta)}ms vs base. Ventana óptima para sesión de calidad.`;
+      } else {
+        verdictText = `Score ${score}, HRV ${hrv}ms. Entrena según plan W2 (${PLAN_W2.km_target}km esta semana).`;
+      }
+    }
+
+    // ──── WEEK block ────
+    const monday = getMonday(today);
+    monday.setHours(0,0,0,0);
+
+    // Activities this week (any sport — for the Marathon plan we'd want only running, but plan says volume incl. all)
+    const weekActs = acts.filter(a => new Date(a.start_date_local) >= monday);
+    const weekRuns = weekActs.filter(a => ['Run','TrailRun'].includes(a.sport_type || a.type));
+    const weekRunKm = weekRuns.reduce((s, a) => s + (a.distance || 0), 0) / 1000;
+    const weekRunTime = weekRuns.reduce((s, a) => s + (a.moving_time || 0), 0);
+    const weekTotalKm = weekActs.reduce((s, a) => s + (a.distance || 0), 0) / 1000;
+
+    const kmPct = (weekRunKm / PLAN_W2.km_target) * 100;
+    const sessionPct = (weekRuns.length / PLAN_W2.sessions_target) * 100;
+
+    const kmClass = kmPct >= 80 ? 'green' : kmPct >= 50 ? 'amber' : 'red';
+    const sesClass = sessionPct >= 80 ? 'green' : sessionPct >= 50 ? 'amber' : 'red';
+
+    // 7-day sleep avg (last 7 nights)
+    const last7 = nights.slice(0, 7);
+    const avgScore7 = last7.length ? Math.round(last7.reduce((s,n) => s + (n.sleep_score||0), 0) / last7.length) : 0;
+    const avgSleep7h = last7.length ? +(last7.reduce((s,n) => s + (n.total_sleep_duration||0), 0) / last7.length / 3600).toFixed(2) : 0;
+    const avgHrv7 = last7.length ? Math.round(last7.reduce((s,n) => s + (n.average_hrv||0), 0) / last7.length) : 0;
+
+    const weekItems = [];
+    weekItems.push(`<li><span class="lbl">Volume run</span> <span class="num ${kmClass}">${weekRunKm.toFixed(1)} / ${PLAN_W2.km_target} km</span> · ${kmPct.toFixed(0)}% del target</li>`);
+    weekItems.push(`<li><span class="lbl">Sessions run</span> <span class="num ${sesClass}">${weekRuns.length} / ${PLAN_W2.sessions_target}</span> · ${weekActs.length - weekRuns.length} cross-train</li>`);
+    weekItems.push(`<li><span class="lbl">Total time</span> <span class="num">${fmtH(weekRunTime)}</span> running · <span class="num">${weekActs.length}</span> sesiones totales</li>`);
+    weekItems.push(`<li><span class="lbl">Sleep 7d</span> Score <span class="num purple">${avgScore7}</span> · <span class="num">${avgSleep7h}h</span> avg · HRV <span class="num purple">${avgHrv7} ms</span></li>`);
+
+    // Week verdict
+    let weekVerdictClass = 'purple';
+    let weekVerdictTitle = 'WEEK · ON TRACK';
+    let weekVerdictText = '';
+    const daysIntoWeek = Math.floor((Date.now() - monday.getTime()) / 86400000) + 1;
+    const expectedKmAtThisPoint = (PLAN_W2.km_target / 7) * daysIntoWeek;
+    const kmDeltaVsPace = weekRunKm - expectedKmAtThisPoint;
+
+    if (kmPct >= 100) {
+      weekVerdictClass = 'today';
+      weekVerdictTitle = 'WEEK · TARGET HIT';
+      weekVerdictText = `Volumen W2 cumplido (${weekRunKm.toFixed(1)}/${PLAN_W2.km_target}km). Mantén o bonifica con sesión cruzada para no sobrepasar carga.`;
+    } else if (kmDeltaVsPace < -5) {
+      weekVerdictClass = 'red';
+      weekVerdictTitle = 'WEEK · BEHIND PACE';
+      weekVerdictText = `Faltan ${(PLAN_W2.km_target - weekRunKm).toFixed(1)}km en ${7 - daysIntoWeek}d para cerrar W2. Re-distribuir o aceptar undershoot.`;
+    } else if (kmPct < 50 && daysIntoWeek > 4) {
+      weekVerdictClass = 'amber';
+      weekVerdictTitle = 'WEEK · CATCH UP';
+      weekVerdictText = `Solo ${kmPct.toFixed(0)}% del target con ${7 - daysIntoWeek}d restantes. Subir volumen ya o aceptar undershoot.`;
+    } else {
+      weekVerdictText = `${kmPct.toFixed(0)}% del target W2 a día ${daysIntoWeek}/7. Pace OK. Faltan ${(PLAN_W2.km_target - weekRunKm).toFixed(1)}km.`;
+    }
+
+    // Render
+    const stamp = new Date().toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+
+    container.innerHTML = `
+      <div class="brief-card today">
+        <div class="brief-head">
+          <span class="brief-title">// TODAY <span class="accent">·</span> READOUT</span>
+          <span class="brief-stamp">${stamp}</span>
+        </div>
+        <ul class="brief-list">${todayItems.join('')}</ul>
+        <div class="brief-verdict ${verdictClass === 'today' ? '' : verdictClass}">
+          <strong>${verdictTitle}</strong>
+          ${verdictText}
+        </div>
+      </div>
+
+      <div class="brief-card week">
+        <div class="brief-head">
+          <span class="brief-title purple">// WEEK <span class="accent">·</span> ${PLAN_W2.week_label}</span>
+          <span class="brief-stamp">Day ${daysIntoWeek}/7</span>
+        </div>
+        <ul class="brief-list">${weekItems.join('')}</ul>
+        <div class="brief-verdict ${weekVerdictClass}">
+          <strong>${weekVerdictTitle}</strong>
+          ${weekVerdictText}
+        </div>
+      </div>
+    `;
+  }).catch(err => renderError('Failed to load: ' + err.message));
 })();
 </script>
 </body>
