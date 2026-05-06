@@ -155,6 +155,47 @@ section:last-of-type{border-bottom:none;}
 .strava-error{background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.3);padding:14px 16px;font-family:var(--font-mono);font-size:11px;color:#ff4d6d;line-height:1.6;}
 .strava-error a{color:var(--glow);}
 
+/* OURA MODULE */
+.oura-status{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.oura-status .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#c084fc;box-shadow:0 0 8px #c084fc;margin-right:6px;animation:pulse 2s infinite;}
+.oura-status .live-dot.cached{background:var(--muted);box-shadow:none;animation:none;}
+.oura-status .meta{color:var(--text);}
+
+.oura-hero{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px;}
+@media(max-width:900px){.oura-hero{grid-template-columns:1fr;}}
+.oura-score-card{background:linear-gradient(135deg,var(--panel) 0%,var(--surface) 100%);border:1px solid #c084fc;padding:24px;position:relative;overflow:hidden;box-shadow:0 0 24px rgba(192,132,252,0.08);}
+.oura-score-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:#c084fc;box-shadow:0 0 12px #c084fc;}
+.oura-score-card .label{font-family:var(--font-mono);font-size:10px;color:#c084fc;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.oura-score-card .score{font-size:64px;font-weight:800;letter-spacing:-2px;line-height:1;margin-bottom:6px;color:#c084fc;text-shadow:0 0 24px rgba(192,132,252,0.4);}
+.oura-score-card .score-sub{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.oura-score-card .score-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
+.oura-score-card .meta-cell{display:flex;flex-direction:column;}
+.oura-score-card .meta-v{font-size:18px;font-weight:800;letter-spacing:-.3px;line-height:1;}
+.oura-score-card .meta-l{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+
+.oura-stages{background:var(--panel);border:1px solid var(--border);padding:24px;}
+.oura-stages .label{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;}
+.stage-bar{display:flex;height:14px;border-radius:0;overflow:hidden;margin-bottom:16px;background:var(--void);}
+.stage-bar .seg{height:100%;}
+.stage-bar .seg.deep{background:#1e3a8a;}
+.stage-bar .seg.rem{background:#c084fc;}
+.stage-bar .seg.light{background:#60a5fa;}
+.stage-bar .seg.awake{background:#fb923c;}
+.stage-legend{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.stage-legend .item{display:flex;align-items:center;gap:8px;}
+.stage-legend .swatch{width:10px;height:10px;flex-shrink:0;}
+.stage-legend .name{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;flex:1;}
+.stage-legend .val{font-size:13px;font-weight:800;letter-spacing:-.3px;}
+.stage-legend .pct{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-left:6px;}
+
+.oura-trend{margin-top:18px;}
+.oura-trend .chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.oura-trend .chart-title{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.oura-trend .chart-stat{font-family:var(--font-mono);font-size:10px;color:#c084fc;letter-spacing:1px;}
+
+.oura-error{background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.3);padding:14px 16px;font-family:var(--font-mono);font-size:11px;color:#ff4d6d;line-height:1.6;}
+.oura-error a{color:var(--glow);}
+
 /* MARATHON MODULE */
 .marathon-hero{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;background:linear-gradient(135deg,var(--panel) 0%,var(--surface) 100%);border:1px solid var(--signal);padding:32px;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(57,255,20,0.08);}
 .marathon-hero::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--signal);box-shadow:0 0 16px var(--signal);}
@@ -263,8 +304,9 @@ footer p .accent{color:var(--glow);}
   <a href="#body" data-target="body">01 · Body</a>
   <a href="#health" data-target="health">02 · Apple Health</a>
   <a href="#strava" data-target="strava">03 · Strava</a>
-  <a href="#marathon" data-target="marathon">04 · Marathon OS</a>
-  <a href="#protocols" data-target="protocols">05 · Protocols</a>
+  <a href="#oura" data-target="oura">04 · Oura</a>
+  <a href="#marathon" data-target="marathon">05 · Marathon OS</a>
+  <a href="#protocols" data-target="protocols">06 · Protocols</a>
 </nav>
 
 <div class="wrap">
@@ -391,10 +433,31 @@ footer p .accent{color:var(--glow);}
     </div>
   </section>
 
-  <section id="marathon">
+  <section id="oura">
     <div class="section-head">
       <div class="section-title">
         <span class="section-num">04 //</span>
+        <span class="section-name" style="color:#c084fc">Oura · Sleep Architecture</span>
+      </div>
+      <span class="section-desc">Live PAT sync &middot; 30-day window &middot; Stages, score, HRV, RHR &middot; 30-min cache</span>
+    </div>
+
+    <div id="ouraContainer">
+      <div class="oura-status">
+        <span><span class="live-dot"></span>Connecting to Oura...</span>
+        <span class="meta">—</span>
+      </div>
+      <div class="oura-stages">
+        <div class="label">// LOADING SLEEP DATA</div>
+        <p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);">Fetching last 30 days from Oura API...</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="marathon">
+    <div class="section-head">
+      <div class="section-title">
+        <span class="section-num">05 //</span>
         <span class="section-name" style="color:var(--signal)">Marathon OS · Palma 18.Oct.2026</span>
       </div>
       <span class="section-desc">Sub 4:30 target &middot; 26-week plan &middot; F1 active</span>
@@ -550,7 +613,7 @@ footer p .accent{color:var(--glow);}
   <section id="protocols">
     <div class="section-head">
       <div class="section-title">
-        <span class="section-num">05 //</span>
+        <span class="section-num">06 //</span>
         <span class="section-name">Active Protocols</span>
       </div>
       <span class="section-desc">Q2 2026 focus &middot; integrated targets</span>
@@ -807,6 +870,210 @@ window.addEventListener('scroll',()=>{
         showError('Rate limit reached.', 'Strava limits to 100 req/15min. Try again shortly.');
       } else {
         showError(body.error || 'Unknown error', body.details ? `<code style="font-size:10px">${escapeHtml(JSON.stringify(body.details))}</code>` : '');
+      }
+    })
+    .catch(err => showError('Network error: ' + err.message));
+})();
+
+/* ───────────────────────────────────────────────
+   OURA · SLEEP ARCHITECTURE
+   ─────────────────────────────────────────────── */
+(function loadOura() {
+  const container = document.getElementById('ouraContainer');
+  if (!container) return;
+
+  function fmtH(seconds) {
+    if (!seconds) return '—';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return `${h}h ${m.toString().padStart(2,'0')}m`;
+  }
+  function fmtHDecimal(hours) {
+    if (hours == null) return '—';
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    return `${h}h ${m.toString().padStart(2,'0')}m`;
+  }
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  function showError(msg, hint) {
+    container.innerHTML = `
+      <div class="oura-error">
+        <strong>Oura sync error.</strong> ${escapeHtml(msg)}
+        ${hint ? `<br/><br/>${hint}` : ''}
+      </div>
+    `;
+  }
+
+  function render(data) {
+    const stats = data.stats || {};
+    const nights = data.nights || [];
+
+    if (!nights.length) {
+      showError('No sleep data returned.', 'Check that Oura PAT has the right scopes (sleep + daily).');
+      return;
+    }
+
+    // Stage breakdown — average % of total sleep
+    const totalAvg = stats.avg_total_sleep_h || 0.0001;
+    const deepPct = ((stats.avg_deep_h || 0) / totalAvg) * 100;
+    const remPct = ((stats.avg_rem_h || 0) / totalAvg) * 100;
+    const lightPct = ((stats.avg_light_h || 0) / totalAvg) * 100;
+    // awake doesn't count toward total sleep
+    const inBed = stats.avg_time_in_bed_h || 0.0001;
+    const awakePct = ((stats.avg_awake_h || 0) / inBed) * 100;
+
+    const synced = new Date(data.synced_at);
+    const syncedLabel = data.cached
+      ? `Cached · ${data.cache_age_s}s ago`
+      : `Live · just synced`;
+
+    // Score classification
+    const score = stats.avg_sleep_score;
+    let scoreLabel = '—';
+    if (score >= 85) scoreLabel = 'OPTIMAL';
+    else if (score >= 70) scoreLabel = 'GOOD';
+    else if (score >= 60) scoreLabel = 'FAIR';
+    else if (score > 0) scoreLabel = 'PAY ATTENTION';
+
+    container.innerHTML = `
+      <div class="oura-status">
+        <span><span class="live-dot ${data.cached ? 'cached' : ''}"></span>${syncedLabel} · ${stats.nights_logged} nights logged</span>
+        <span class="meta">${synced.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}</span>
+      </div>
+
+      <div class="oura-hero">
+        <div class="oura-stages">
+          <div class="label">// AVG SLEEP COMPOSITION · 30D</div>
+          <div class="stage-bar">
+            <div class="seg deep" style="width:${deepPct.toFixed(1)}%"></div>
+            <div class="seg rem" style="width:${remPct.toFixed(1)}%"></div>
+            <div class="seg light" style="width:${lightPct.toFixed(1)}%"></div>
+            <div class="seg awake" style="width:${awakePct.toFixed(1)}%"></div>
+          </div>
+          <div class="stage-legend">
+            <div class="item">
+              <span class="swatch" style="background:#1e3a8a"></span>
+              <span class="name">Deep</span>
+              <span class="val">${fmtHDecimal(stats.avg_deep_h)}</span>
+              <span class="pct">${deepPct.toFixed(0)}%</span>
+            </div>
+            <div class="item">
+              <span class="swatch" style="background:#c084fc"></span>
+              <span class="name">REM</span>
+              <span class="val">${fmtHDecimal(stats.avg_rem_h)}</span>
+              <span class="pct">${remPct.toFixed(0)}%</span>
+            </div>
+            <div class="item">
+              <span class="swatch" style="background:#60a5fa"></span>
+              <span class="name">Light</span>
+              <span class="val">${fmtHDecimal(stats.avg_light_h)}</span>
+              <span class="pct">${lightPct.toFixed(0)}%</span>
+            </div>
+            <div class="item">
+              <span class="swatch" style="background:#fb923c"></span>
+              <span class="name">Awake</span>
+              <span class="val">${fmtHDecimal(stats.avg_awake_h)}</span>
+              <span class="pct">${awakePct.toFixed(0)}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="oura-score-card">
+          <div class="label">// AVG SLEEP SCORE · 30D</div>
+          <div class="score">${stats.avg_sleep_score || '—'}</div>
+          <div class="score-sub">${scoreLabel} · ${stats.avg_total_sleep_h}h avg · ${stats.avg_efficiency}% eff</div>
+          <div class="score-meta">
+            <div class="meta-cell"><div class="meta-v">${stats.avg_hrv_ms || '—'} <span style="font-family:var(--font-mono);font-size:9px;color:var(--muted)">ms</span></div><div class="meta-l">HRV (rmssd)</div></div>
+            <div class="meta-cell"><div class="meta-v">${stats.avg_resting_hr || '—'} <span style="font-family:var(--font-mono);font-size:9px;color:var(--muted)">bpm</span></div><div class="meta-l">Resting HR</div></div>
+            <div class="meta-cell"><div class="meta-v">${stats.avg_breath || '—'} <span style="font-family:var(--font-mono);font-size:9px;color:var(--muted)">/min</span></div><div class="meta-l">Breath rate</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="oura-trend">
+        <div class="grid grid-2">
+          <div class="chart-wrap">
+            <div class="chart-head"><span class="chart-title">// SLEEP DURATION · 30D (h)</span><span class="chart-stat">σ ${stats.avg_total_sleep_h}h</span></div>
+            <canvas id="ouraSleepChart"></canvas>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-head"><span class="chart-title">// HRV · 30D (ms)</span><span class="chart-stat">σ ${stats.avg_hrv_ms} ms</span></div>
+            <canvas id="ouraHrvChart"></canvas>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Build trend charts (oldest → newest)
+    const sortedNights = [...nights].sort((a, b) => a.day.localeCompare(b.day));
+    const labels = sortedNights.map(n => {
+      const d = new Date(n.day);
+      return (d.getDate() + '.' + ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][d.getMonth()]);
+    });
+    const sleepHours = sortedNights.map(n => +(n.total_sleep_duration / 3600).toFixed(2));
+    const hrvData = sortedNights.map(n => n.average_hrv);
+
+    const baseGrid = { color:'rgba(14,42,61,0.6)', drawBorder:false };
+    const baseTicks = { color:'#4a7a96', font:{family:"'Space Mono',monospace", size:8}, maxRotation:0, autoSkip:true, maxTicksLimit:8};
+
+    new Chart(document.getElementById('ouraSleepChart'), {
+      type:'line',
+      data:{labels, datasets:[{
+        data:sleepHours,
+        borderColor:'#c084fc',
+        backgroundColor:'rgba(192,132,252,0.08)',
+        borderWidth:2,
+        fill:true,
+        tension:0.3,
+        pointBackgroundColor:'#c084fc',
+        pointRadius:2,
+        pointHoverRadius:5
+      }]},
+      options:{
+        responsive:true,maintainAspectRatio:true,
+        plugins:{legend:{display:false},tooltip:{backgroundColor:'#020408',borderColor:'#c084fc',borderWidth:1,titleFont:{family:"'Space Mono',monospace",size:10},bodyFont:{family:"'Space Mono',monospace",size:11},callbacks:{label:(c)=>` ${c.parsed.y}h sleep`}}},
+        scales:{x:{grid:baseGrid,ticks:baseTicks},y:{grid:baseGrid,ticks:{...baseTicks,callback:(v)=>v+'h'},suggestedMin:5,suggestedMax:9}}
+      }
+    });
+
+    new Chart(document.getElementById('ouraHrvChart'), {
+      type:'line',
+      data:{labels, datasets:[{
+        data:hrvData,
+        borderColor:'#39FF14',
+        backgroundColor:'rgba(57,255,20,0.08)',
+        borderWidth:2,
+        fill:true,
+        tension:0.3,
+        pointBackgroundColor:'#39FF14',
+        pointRadius:2,
+        pointHoverRadius:5
+      }]},
+      options:{
+        responsive:true,maintainAspectRatio:true,
+        plugins:{legend:{display:false},tooltip:{backgroundColor:'#020408',borderColor:'#39FF14',borderWidth:1,titleFont:{family:"'Space Mono',monospace",size:10},bodyFont:{family:"'Space Mono',monospace",size:11},callbacks:{label:(c)=>` ${c.parsed.y} ms`}}},
+        scales:{x:{grid:baseGrid,ticks:baseTicks},y:{grid:baseGrid,ticks:{...baseTicks,callback:(v)=>v+' ms'}}}
+      }
+    });
+  }
+
+  fetch('/.netlify/functions/oura')
+    .then(r => r.json().then(d => ({ status: r.status, body: d })))
+    .then(({ status, body }) => {
+      if (status === 200) {
+        render(body);
+      } else if (status === 500 && body.required) {
+        showError('PAT not configured.',
+          'Add <code>OURA_PAT</code> in Netlify env vars. Get one at <a href="https://cloud.ouraring.com/personal-access-tokens" target="_blank">cloud.ouraring.com/personal-access-tokens</a>.');
+      } else if (status === 401) {
+        showError('Token invalid or revoked.', 'Generate a new PAT and update <code>OURA_PAT</code> in Netlify.');
+      } else {
+        showError(body.error || 'Unknown error', body.oura_response ? `<code style="font-size:10px">${escapeHtml(JSON.stringify(body.oura_response))}</code>` : '');
       }
     })
     .catch(err => showError('Network error: ' + err.message));
