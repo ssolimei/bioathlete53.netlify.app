@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>BIO-ATHLETE 53 // Strava Auth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #080808;
+    --void2: #141414;
+    --signal: #39FF14;
+    --glow: #00d4ff;
+    --text: #ededed;
+    --muted: #8a9aa6;
+    --dim: #1f2937;
+    --font-mono: 'Space Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--void);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    line-height: 1.5;
+  }
+  .auth-card {
+    max-width: 640px;
+    width: 100%;
+    background: var(--void2);
+    border: 1px solid var(--dim);
+    padding: 32px;
+  }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  h1 .accent { color: var(--signal); }
+  .sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+  }
+  .step {
+    border-left: 2px solid var(--dim);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+  }
+  .step.active { border-left-color: var(--signal); }
+  .step.done { border-left-color: var(--glow); }
+  .step h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .step p { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
+  .step code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--void);
+    padding: 2px 6px;
+    color: var(--signal);
+    border: 1px solid var(--dim);
+  }
+  .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: var(--signal);
+    color: var(--void);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: none;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .btn:hover { box-shadow: 0 0 16px rgba(57, 255, 20, 0.5); }
+  .btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--dim); }
+  .output {
+    background: var(--void);
+    border: 1px solid var(--dim);
+    padding: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    word-break: break-all;
+    margin-top: 12px;
+    color: var(--signal);
+    white-space: pre-wrap;
+  }
+  .error { color: #ff4d6d; border-color: #ff4d6d; }
+  label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--void);
+    border: 1px solid var(--dim);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  input:focus { outline: none; border-color: var(--signal); }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+  <div class="auth-card">
+    <h1>STRAVA <span class="accent">// AUTH</span></h1>
+    <div class="sub">// One-time OAuth setup · BIO-ATHLETE 53</div>
+
+    <div class="step active" id="step1">
+      <h3>// 01 · Set Client ID</h3>
+      <p>Paste your Strava Application <strong>Client ID</strong> (from <a href="https://www.strava.com/settings/api" target="_blank" style="color:var(--glow)">strava.com/settings/api</a>).</p>
+      <label>STRAVA_CLIENT_ID</label>
+      <input type="text" id="clientId" placeholder="e.g. 123456">
+      <button class="btn" onclick="startAuth()">Continue → Authorize</button>
+    </div>
+
+    <div class="step" id="step2">
+      <h3>// 02 · Strava Authorization</h3>
+      <p>You'll be redirected to Strava to grant access. After approving, you'll come back here automatically.</p>
+    </div>
+
+    <div class="step" id="step3">
+      <h3>// 03 · Save Refresh Token</h3>
+      <p>Copy the refresh_token below and save it as <code>STRAVA_REFRESH_TOKEN</code> in Netlify env vars.</p>
+      <p style="font-size:12px;">Path: <code>Netlify → Site Settings → Build &amp; Deploy → Environment</code></p>
+      <div id="tokenOutput" class="output hidden"></div>
+    </div>
+  </div>
+
+<script>
+function startAuth() {
+  const clientId = document.getElementById('clientId').value.trim();
+  if (!clientId) { alert('Client ID required'); return; }
+  localStorage.setItem('strava_client_id', clientId);
+
+  const redirectUri = window.location.origin + '/auth.html';
+  const scope = 'read,activity:read_all';
+  const url = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&approval_prompt=auto&scope=${scope}`;
+  window.location.href = url;
+}
+
+// Detect callback (?code=... or ?error=...)
+const params = new URLSearchParams(window.location.search);
+const code = params.get('code');
+const error = params.get('error');
+
+if (error) {
+  document.getElementById('step3').classList.add('active');
+  const out = document.getElementById('tokenOutput');
+  out.classList.remove('hidden');
+  out.classList.add('error');
+  out.textContent = 'Authorization denied: ' + error;
+}
+
+if (code) {
+  // Mark steps done
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step1').classList.add('done');
+  document.getElementById('step2').classList.add('done');
+  document.getElementById('step3').classList.add('active');
+
+  const out = document.getElementById('tokenOutput');
+  out.classList.remove('hidden');
+  out.textContent = 'Exchanging code for tokens...';
+
+  fetch('/.netlify/functions/strava-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code })
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        out.classList.add('error');
+        out.textContent = 'Error: ' + data.error + '\n\n' + JSON.stringify(data.details || {}, null, 2);
+        return;
+      }
+      out.textContent =
+        '✓ Auth complete\n\n' +
+        'athlete: ' + (data.athlete?.firstname || 'unknown') + ' (id ' + (data.athlete?.id || '?') + ')\n\n' +
+        '════════════════════════════════════════════\n' +
+        'COPY THIS → STRAVA_REFRESH_TOKEN env var\n' +
+        '════════════════════════════════════════════\n\n' +
+        data.refresh_token + '\n\n' +
+        '════════════════════════════════════════════\n' +
+        'Then redeploy site. Done.';
+    })
+    .catch(err => {
+      out.classList.add('error');
+      out.textContent = 'Network error: ' + err.message;
+    });
+}
+</script>
+</body>
+</html>
